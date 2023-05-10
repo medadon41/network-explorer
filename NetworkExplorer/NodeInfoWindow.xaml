@@ -1,0 +1,26 @@
+﻿<Window x:Class="NetworkExplorer.NodeInfoWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:NetworkExplorer"
+        mc:Ignorable="d"
+        Title="Node Information" Height="450" Width="470"
+        Loaded="Window_Loaded">
+    <Grid>
+        <TextBox x:Name="NodeName" HorizontalAlignment="Left" Margin="10,56,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="215" IsReadOnly="True"/>
+        <Label Content="Node name" HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top" Width="143"/>
+        <TextBox x:Name="NodeNetworkName" HorizontalAlignment="Left" Margin="10,121,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="215"/>
+        <Label Content="Node name (network)" HorizontalAlignment="Left" Margin="10,95,0,0" VerticalAlignment="Top" Width="143"/>
+        <TextBox x:Name="IpTextbox" HorizontalAlignment="Left" Margin="10,194,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="215" IsReadOnly="True"/>
+        <Label Content="IP Address" HorizontalAlignment="Left" Margin="10,168,0,0" VerticalAlignment="Top" Width="143"/>
+        <Button x:Name="NodeNameChangeButton" Content="Change" HorizontalAlignment="Left" Margin="238,121,0,0" VerticalAlignment="Top" Height="18" Width="103" Click="NodeNameChange_Button" Padding="1,0,1,0"/>
+        <TextBox x:Name="MacTextbox" HorizontalAlignment="Left" Margin="10,271,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="215" IsReadOnly="True"/>
+        <Label Content="MAC Address" HorizontalAlignment="Left" Margin="10,245,0,0" VerticalAlignment="Top" Width="143"/>
+        <TextBox x:Name="SpeedRateTextbox" HorizontalAlignment="Left" Margin="238,194,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="103"/>
+        <Label Content="Speed rate limit (Kbit/s)" HorizontalAlignment="Left" Margin="238,168,0,0" VerticalAlignment="Top" Width="142"/>
+        <Button x:Name="ToggleLockButton" Content="Disable access" HorizontalAlignment="Center" Margin="0,311,0,0" VerticalAlignment="Top" Width="202" Height="39" Click="ToggleLockButton_Click"/>
+        <Button x:Name="SpeedRateChangeButton" Content="Change" HorizontalAlignment="Left" Margin="346,194,0,0" VerticalAlignment="Top" Height="18" Width="94" Click="SpeedRateChangeButton_Click" Padding="1,0,1,0"/>
+
+    </Grid>
+</Window>

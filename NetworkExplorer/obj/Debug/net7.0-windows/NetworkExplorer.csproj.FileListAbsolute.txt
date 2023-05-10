@@ -19,3 +19,10 @@ C:\Users\Данила\source\repos\NetworkExplorer\obj\Debug\net7.0-windows\refi
 C:\Users\Данила\source\repos\NetworkExplorer\obj\Debug\net7.0-windows\NetworkExplorer.pdb
 C:\Users\Данила\source\repos\NetworkExplorer\obj\Debug\net7.0-windows\NetworkExplorer.genruntimeconfig.cache
 C:\Users\Данила\source\repos\NetworkExplorer\obj\Debug\net7.0-windows\ref\NetworkExplorer.dll
+C:\Users\Данила\source\repos\NetworkExplorer\bin\Debug\net7.0-windows\System.Management.dll
+C:\Users\Данила\source\repos\NetworkExplorer\bin\Debug\net7.0-windows\runtimes\win\lib\net7.0\System.Management.dll
+C:\Users\Данила\source\repos\NetworkExplorer\obj\Debug\net7.0-windows\NetworkExplorer.csproj.CopyComplete
+C:\Users\Данила\source\repos\NetworkExplorer\obj\Debug\net7.0-windows\AuthPrompt.g.cs
+C:\Users\Данила\source\repos\NetworkExplorer\obj\Debug\net7.0-windows\AuthPrompt.baml
+C:\Users\Данила\source\repos\NetworkExplorer\obj\Debug\net7.0-windows\NodeInfoWindow.g.cs
+C:\Users\Данила\source\repos\NetworkExplorer\obj\Debug\net7.0-windows\NodeInfoWindow.baml

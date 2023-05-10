@@ -5,18 +5,48 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:NetworkExplorer"
         mc:Ignorable="d"
-        Title="MainWindow" Height="500" Width="850" ResizeMode="CanMinimize">
+        Title="mddn's Network Explorer" Height="500" Width="850" ResizeMode="CanMinimize" Loaded="Window_Loaded" Closing="OnWindowClosing">
+    <Window.Resources>
+        <CollectionViewSource x:Key="_nodesViewSource"/>
+        <CollectionViewSource x:Key="_disabledNodesViewSource"/>
+    </Window.Resources>
     <Grid>
-        <ComboBox HorizontalAlignment="Left" Height="20" Margin="589,10,0,0" VerticalAlignment="Top" Width="201" Name="NodesList" ItemsSource="{Binding Nodes}" SelectionChanged="NodesList_SelectionChanged"/>
-        <Button Content="Refresh" HorizontalAlignment="Left" Margin="589,387,0,0" VerticalAlignment="Top" Width="201" Height="37" Click="Button_Click"/>
-        <Label Content="IP" HorizontalAlignment="Left" Margin="10,7,0,0" VerticalAlignment="Top" />
-        <TextBlock x:Name="IPAddress_Block" HorizontalAlignment="Left" Height="20" Margin="53,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="450" RenderTransformOrigin="0.498,0.569" Text="192.168.1.62"/>
-        <Label Content="OS" HorizontalAlignment="Left" Margin="10,37,0,0" VerticalAlignment="Top" />
-        <TextBlock x:Name="OSystem_Block" HorizontalAlignment="Left" Height="20" Margin="53,40,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="450" RenderTransformOrigin="0.498,0.569" Text="MDDN-PC"/>
-        <Label Content="MAC" HorizontalAlignment="Left" Margin="10,67,0,0" VerticalAlignment="Top" />
-        <TextBlock x:Name="MACAdress_Block" HorizontalAlignment="Left" Height="20" Margin="53,70,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="450" RenderTransformOrigin="0.498,0.569" Text="a8:5e:45:38:7e:28"/>
-        <Label Content="Name" HorizontalAlignment="Left" Margin="10,97,0,0" VerticalAlignment="Top" />
-        <TextBox Name="NameInput" HorizontalAlignment="Left" Margin="53,101,0,0" TextWrapping="Wrap" Text="MDDN-PC" VerticalAlignment="Top" Width="257" TextChanged="NameInput_TextChanged"/>
-        <Button Content="Change" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="310,101,390,316" Click="Button_Click_1" Height="20" Width="100" FontSize="10"/>
+        <DataGrid ItemsSource="{Binding Source={StaticResource _nodesViewSource}}"  Margin="10,48,10,257" EnableRowVirtualization="False" AutoGenerateColumns="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding IPAdress}"
+                                    Header="IP"
+                                    IsReadOnly="True"/>
+                <DataGridTextColumn Binding="{Binding MAC}" Header="MAC" 
+                                        Width="*" IsReadOnly="True"/>
+                <DataGridTextColumn Binding="{Binding Name}" Header="Name" 
+                                        Width="*" IsReadOnly="True"/>
+                <DataGridTemplateColumn x:Name="EditButtons" Header="Details" Visibility="Collapsed">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Content="Edit" Click="AdminButtonEdit_Click"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+        <Button x:Name="RefreshButton" Content="Refresh" HorizontalAlignment="Left" Margin="670,10,0,0" VerticalAlignment="Top" Height="33" Width="141" Click="RefreshButton_Click"/>
+        <Button x:Name="AdminButton" Content="Admin mode" HorizontalAlignment="Left" Margin="10,425,0,0" VerticalAlignment="Top" Width="150" Height="33" Click="AdminButton_Click"/>
+        <DataGrid x:Name="DisabledNodesTable" ItemsSource="{Binding Source=DisabledNodes}" Margin="10,232,10,64" Visibility="Collapsed">
+            <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding IPAdress}"
+                                    Header="IP"
+                                    IsReadOnly="True"
+                                     Width="*"/>
+                <DataGridTextColumn Binding="{Binding MAC}" Header="MAC" 
+                                        Width="*" IsReadOnly="True"/>
+                <DataGridTemplateColumn x:Name="EnableButtons" Header="Enable">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Content="Enable" Click="DisabledNodeButton_Click"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
-</Window>
+</Window>     

@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET7_0;NETCOREAPP
 C:\Users\Данила\source\repos\NetworkExplorer\App.xaml
-11407045341
+3-1648395416
 
-6737994940
+12-1956206275
 199534714296
-MainWindow.xaml;
+AuthPrompt.xaml;MainWindow.xaml;NodeInfoWindow.xaml;
 
-False
+True
 

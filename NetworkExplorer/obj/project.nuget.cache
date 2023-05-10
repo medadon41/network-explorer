@@ -1,11 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "Ne9ZkruzHGwb7pFx5JsttOCE3F7A62SIzwN/vpHV+EsUhI0R2/U2sUEVD/JPTTG2kPN6SCc0jktGb2LfyuCDNg==",
+  "dgSpecHash": "IDgQHlYECemdpronIfsJzcGzoLvvVVsmHwDPBxyyGioSGTED0G2pMWQMwIItGlJyYPZ7OmAzeZO1iuUqP8SMzA==",
   "success": true,
   "projectFilePath": "C:\\Users\\Данила\\source\\repos\\NetworkExplorer\\NetworkExplorer.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Данила\\.nuget\\packages\\system.codedom\\7.0.0\\system.codedom.7.0.0.nupkg.sha512",
-    "C:\\Users\\Данила\\.nuget\\packages\\system.management\\7.0.1\\system.management.7.0.1.nupkg.sha512"
+    "C:\\Users\\Данила\\.nuget\\packages\\system.management\\7.0.1\\system.management.7.0.1.nupkg.sha512",
+    "C:\\Users\\Данила\\.nuget\\packages\\microsoft.windows.sdk.net.ref\\10.0.17763.28\\microsoft.windows.sdk.net.ref.10.0.17763.28.nupkg.sha512"
   ],
   "logs": []
 }

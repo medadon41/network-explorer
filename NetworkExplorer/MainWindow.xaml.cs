@@ -18,6 +18,14 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Diagnostics;
 using System.Management;
+using ConsoleApp1;
+using System.Text.RegularExpressions;
+using NetworkExplorer.Misc;
+using MinimalisticTelnet;
+using System.IO;
+using System.Text.Json;
+using System.ComponentModel;
+using System.Xml.Linq;
 
 namespace NetworkExplorer
 {
@@ -26,7 +34,17 @@ namespace NetworkExplorer
     /// </summary>
     public partial class MainWindow : Window
     {
-        private ObservableCollection<NetworkNode> Nodes { get; set; } = new();
+        public ObservableCollection<NetworkNode> Nodes { get; set; } = new();
+
+        public ObservableCollection<NetworkNode> DisabledNodes { get; set; } = new();
+
+        private CollectionViewSource _nodesViewSource;
+
+        private CollectionViewSource _disabledNodesViewSource;
+
+        private string? adminLogin {get; set;}
+
+        private string? adminPassword { get; set;}
 
         public NetworkNode SelectedNode = new NetworkNode() { IPAdress = "None", MAC = "None", Name = "None" };
 
@@ -34,23 +52,16 @@ namespace NetworkExplorer
         {
             InitializeComponent();
             FillNodes();
-            RefreshList();
+            _nodesViewSource =
+                    (CollectionViewSource)FindResource(nameof(_nodesViewSource));
+            _disabledNodesViewSource =
+                    (CollectionViewSource)FindResource(nameof(_disabledNodesViewSource));
         }
 
-        public void SetFields()
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            IPAddress_Block.Text = SelectedNode.IPAdress;
-            MACAdress_Block.Text = SelectedNode.MAC ?? "None";
-            NameInput.Text = SelectedNode.Name ?? "None";
-        }
-
-        public void RefreshList()
-        {
-            NodesList.Items.Clear();
-            foreach (var node in Nodes)
-            {
-                NodesList.Items.Add(node.IPAdress);
-            }
+            _nodesViewSource.Source = Nodes.ToList();
+            await RestoreDisabledNodes();
         }
 
         private void FillNodes()
@@ -58,12 +69,17 @@ namespace NetworkExplorer
             IPGlobalProperties properties = IPGlobalProperties.GetIPGlobalProperties();
             TcpConnectionInformation[] connections = properties.GetActiveTcpConnections();
 
-            foreach (IPAddress address in GetArpAddresses())
+
+            foreach (IpMacPair pair in GetArpAddresses())
             {
+                if (!pair.IPAddress.ToString().StartsWith("192")) {
+                    continue;
+                }
+
                 bool isConnected = false;
                 foreach (TcpConnectionInformation connection in connections)
                 {
-                    if (connection.LocalEndPoint.Address.Equals(address))
+                    if (connection.LocalEndPoint.Address.Equals(pair.IPAddress))
                     {
                         isConnected = true;
                         break;
@@ -74,15 +90,43 @@ namespace NetworkExplorer
                 {
                     Nodes.Add(new NetworkNode()
                     {
-                        IPAdress = address.ToString()
+                        Name = GetNodeName(pair.IPAddress.ToString()) ?? "Unknown",
+                        IPAdress = pair.IPAddress.ToString(),
+                        MAC = pair.PhysicalAddress.ToString(),
                     });
                 }
             }
         }
 
-        List<IPAddress> GetArpAddresses()
+
+        private string? GetNodeName(string ipadress)
         {
-            List<IPAddress> addresses = new List<IPAddress>();
+            Process process = new Process();
+            process.StartInfo.FileName = "nbtstat";
+            process.StartInfo.Arguments = $"-a {ipadress}";
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.CreateNoWindow = true;
+            process.Start();
+
+            string output = process.StandardOutput.ReadToEnd();
+
+            process.WaitForExit();
+
+            string pattern = @"(\b\w+-*\w*\b)\s+<20>";
+            Match match = Regex.Match(output, pattern);
+
+            if (match.Success)
+            {
+                string computerName = match.Groups[1].Value;
+                return computerName;
+            }
+            return null;
+        }
+
+        private List<IpMacPair> GetArpAddresses()
+        {
+            List<IpMacPair> addresses = new List<IpMacPair>();
 
             ProcessStartInfo psi = new ProcessStartInfo("arp", "-a");
             psi.RedirectStandardOutput = true;
@@ -99,58 +143,131 @@ namespace NetworkExplorer
                 {
                     try
                     {
+                        var a = tokens;
                         IPAddress address = IPAddress.Parse(tokens[0]);
-                        addresses.Add(address);
+                        PhysicalAddress mac = PhysicalAddress.Parse(tokens[1]);
+                        addresses.Add(new IpMacPair
+                        {
+                            IPAddress = address,
+                            PhysicalAddress = mac
+                        });
                     }
                     catch (FormatException) { }
                 }
             }
 
+
             return addresses;
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+
+
+        private void AdminButton_Click(object sender, RoutedEventArgs e)
         {
-            RefreshList();
+            AuthPrompt authPrompt = new();
+            authPrompt.DataEntered += AuthPrompt_DataEntered;
+            authPrompt.Show();
         }
 
-        private void Button_Click_1(object sender, RoutedEventArgs e)
+
+        public async void OnWindowClosing(object sender, CancelEventArgs e)
         {
-            IPHostEntry host = Dns.GetHostEntry(SelectedNode.IPAdress);
-            string nodeName = host.HostName;
-            Console.WriteLine(nodeName);
+            await SaveDisabledNodes();
+        }
 
-            ManagementScope scope = new ManagementScope($"\\\\{nodeName}\\root\\cimv2");
-            scope.Connect();
-
-            ManagementClass mc = new ManagementClass("Win32_ComputerSystem");
-            ManagementObjectCollection moc = mc.GetInstances();
-
-            foreach (ManagementObject mo in moc)
+        private async Task SaveDisabledNodes()
+        {
+            if (DisabledNodes.Count > 0)
             {
-                mo["Name"] = "newName";
-                mo.Put();
+                using (FileStream fs = new FileStream($"{Environment.GetFolderPath(Environment.SpecialFolder.MyDoc‌​uments)}\\disabledNodes.json", FileMode.Truncate))
+                {
+                    //var nodes = Nodes.ToList();
+                    await JsonSerializer.SerializeAsync<List<NetworkNode>>(fs, DisabledNodes.ToList());
+                    Console.WriteLine("Data has been saved to file");
+                }
             }
         }
 
-        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private async Task RestoreDisabledNodes()
         {
+            using (FileStream fs = new FileStream($"{Environment.GetFolderPath(Environment.SpecialFolder.MyDoc‌​uments)}\\disabledNodes.json", FileMode.OpenOrCreate))
+            {
+                var nodes = new List<NetworkNode>();
+                try
+                {
+                    nodes = await JsonSerializer.DeserializeAsync<List<NetworkNode>>(fs);
+                }
+                catch (Exception ex)
+                {
+                }
 
+                foreach (var node in nodes)
+                {
+                    DisabledNodes.Add(node);
+                }
+            }
+            Console.WriteLine();
         }
 
-        private void NodesList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+
+        private void AdminButtonEdit_Click(object sender, RoutedEventArgs e)
         {
-            if (NodesList.SelectedValue is not null)
+            Button button = sender as Button;
+            NetworkNode node = button.DataContext as NetworkNode;
+            if (node != null)
             {
-                var a = NodesList.SelectedValue.ToString();
-                SelectedNode = Nodes.FirstOrDefault(i => i.IPAdress == NodesList.SelectedValue.ToString());
-                SetFields();
+                NodeInfoWindow nodeInfoWindow = new NodeInfoWindow(adminLogin, adminPassword, node);
+                nodeInfoWindow.NodeDisabled += NodeInfo_NodeDisabled;
+                nodeInfoWindow.NodeEnabled += NodeInfo_NodeEnabled;
+                nodeInfoWindow.Show();
             }
         }
 
-        private void NameInput_TextChanged(object sender, TextChangedEventArgs e)
+        private void AuthPrompt_DataEntered(object sender, CredsEnteredEventArgs e)
         {
+            adminLogin = e.Login;
+            adminPassword = e.Password;
+            AdminButton.IsEnabled = false;
+            EditButtons.Visibility = Visibility.Visible;
+            DisabledNodesTable.Visibility = Visibility.Visible;
+            DisabledNodesTable.ItemsSource = null;
+            DisabledNodesTable.ItemsSource = DisabledNodes;
+        }
 
+        private void NodeInfo_NodeDisabled(object sender, NetworkNodeEventArgs e)
+        {
+            DisabledNodes.Add(e.Node);
+        }
+
+        private void NodeInfo_NodeEnabled(object sender, NetworkNodeEventArgs e)
+        {
+            DisabledNodes.Remove(e.Node);
+        }
+
+        private void DisabledNodeButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            NetworkNode node = button.DataContext as NetworkNode;
+            if (node != null)
+            {
+                TelnetConnection tc = new TelnetConnection("192.168.1.1", 23);
+
+                string s = tc.Login(adminLogin, adminPassword, 1000);
+                Console.Write(s);
+
+                string mac = string.Join(":", Enumerable.Range(0, 6)
+                    .Select(i => node.MAC.Substring(i * 2, 2).ToLower()));
+
+
+                tc.WriteLine($"ip hotspot host {mac} permit");
+
+            }
+        }
+
+        private void RefreshButton_Click(object sender, RoutedEventArgs e)
+        {
+            Nodes.Clear();
+            FillNodes();
         }
     }
 }
